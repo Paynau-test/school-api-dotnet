@@ -1,0 +1,102 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: School API .NET - Scores CRUD + JWT Auth (C# .NET 8 + Lambda + API Gateway)
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+
+Parameters:
+  DbHost:
+    Type: String
+    Default: "localhost"
+  DbPort:
+    Type: String
+    Default: "3306"
+  DbName:
+    Type: String
+    Default: "school_db"
+  DbUser:
+    Type: String
+    Default: "school_user"
+  DbPassword:
+    Type: String
+    Default: "school_pass"
+    NoEcho: true
+  JwtSecret:
+    Type: String
+    Default: "dev-secret-change-in-production"
+    NoEcho: true
+  VpcId:
+    Type: String
+    Description: VPC ID for Lambda networking
+  SubnetIds:
+    Type: CommaDelimitedList
+    Description: Private subnet IDs (comma-separated)
+
+Resources:
+  # ── Lambda Security Group ───────────────────
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for School API .NET Lambda functions
+      VpcId: !Ref VpcId
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: 0.0.0.0/0
+          Description: MySQL outbound
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: HTTPS outbound
+      Tags:
+        - Key: project
+          Value: school
+        - Key: environment
+          Value: dev
+
+  # ── API Function (handles all routes) ───────
+  SchoolApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: SchoolApi
+      Runtime: dotnet8
+      CodeUri: ./src/
+      Description: School API .NET - All endpoints (scores + auth)
+      Environment:
+        Variables:
+          DB_HOST: !Ref DbHost
+          DB_PORT: !Ref DbPort
+          DB_NAME: !Ref DbName
+          DB_USER: !Ref DbUser
+          DB_PASSWORD: !Ref DbPassword
+          JWT_SECRET: !Ref JwtSecret
+          JWT_EXPIRES_IN: "24h"
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds: !Ref SubnetIds
+      Events:
+        ProxyRoot:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+        ProxyAll:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+      Tags:
+        project: school
+        environment: dev
+        owner: isaac
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway URL
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
