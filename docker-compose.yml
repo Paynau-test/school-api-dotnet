@@ -1,0 +1,15 @@
+services:
+  api:
+    build: .
+    container_name: school-api-dotnet
+    ports:
+      - "3002:3002"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DB_HOST=host.docker.internal
+      - DB_PORT=3306
+      - DB_USER=school_user
+      - DB_PASSWORD=school_pass
+      - DB_NAME=school_db
+      - JWT_SECRET=school-jwt-secret-dev-2026-dotnet-api-minimum-32-bytes
+    restart: unless-stopped

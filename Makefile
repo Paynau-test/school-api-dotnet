@@ -1,21 +1,35 @@
 # ============================================
-# school-api-dotnet · Makefile
+# school-api · Makefile
 # ============================================
 
 REGION := us-east-1
-STACK  := school-api-dotnet
+STACK  := school-api
 GH_ORG := Paynau-test
 
-.PHONY: install build deploy db-deploy destroy dev logs-aws help
+.PHONY: install build deploy destroy dev stop logs dev-native logs-aws postman postman-prod push help
 
 # ── Setup ───────────────────────────────────
 
 install:
-	@cd src && dotnet restore
+	@docker compose build api
 
 # ── Local Development ───────────────────────
 
 dev:
+	@docker compose down 2>/dev/null || true
+	@docker compose up -d --build api
+	@echo "API running at http://localhost:3002"
+	@echo "  make logs → ver logs"
+	@echo "  make stop → detener"
+
+stop:
+	@docker compose down
+	@echo "Stopped."
+
+logs:
+	@docker compose logs -f api
+
+dev-native:
 	@cd src && dotnet run --urls "http://localhost:3002"
 
 # ── Build & Deploy ──────────────────────────
@@ -73,11 +87,30 @@ destroy:
 logs-aws:
 	@sam logs --stack-name $(STACK) --tail
 
+# ── Postman ─────────────────────────────
+
+postman:
+	@node scripts/generate-postman.js
+	@echo ""
+	@echo "Import into Postman:"
+	@echo "  postman/school-api-local.postman_collection.json"
+	@echo "  postman/school-api-production.postman_collection.json"
+
+postman-prod:
+	@API_URL=$$(aws cloudformation describe-stacks \
+		--stack-name $(STACK) --region $(REGION) \
+		--query 'Stacks[0].Outputs[?OutputKey==`ApiUrl`].OutputValue' \
+		--output text 2>/dev/null) && \
+	PROD_URL=$$API_URL node scripts/generate-postman.js && \
+	echo "" && \
+	echo "Production URL: $$API_URL" && \
+	echo "Import: postman/school-api-production.postman_collection.json"
+
 # ── GitHub ──────────────────────────────────
 
 push:
-	@if ! gh repo view $(GH_ORG)/school-api-dotnet > /dev/null 2>&1; then \
-		gh repo create $(GH_ORG)/school-api-dotnet --public --source=. --push; \
+	@if ! gh repo view $(GH_ORG)/school-api > /dev/null 2>&1; then \
+		gh repo create $(GH_ORG)/school-api --public --source=. --push; \
 	else \
 		git push origin main; \
 	fi
@@ -86,10 +119,13 @@ push:
 
 help:
 	@echo ""
-	@echo "school-api-dotnet commands:"
+	@echo "school-api commands:"
 	@echo ""
-	@echo "  make install      Restore NuGet packages"
-	@echo "  make dev          Run locally (port 3002)"
+	@echo "  make install      Build Docker image"
+	@echo "  make dev          Run in Docker (port 3002)"
+	@echo "  make stop         Stop container"
+	@echo "  make logs         Tail container logs"
+	@echo "  make dev-native   Run without Docker (needs .NET SDK)"
 	@echo ""
 	@echo "  make build        SAM build"
 	@echo "  make deploy       Build and deploy to AWS"
@@ -98,4 +134,7 @@ help:
 	@echo ""
 	@echo "  make logs-aws     Tail CloudWatch logs"
 	@echo "  make push         Push to GitHub"
+	@echo ""
+	@echo "  make postman      Generate Postman collections (local + prod placeholder)"
+	@echo "  make postman-prod Generate Postman collections with real prod URL from AWS"
 	@echo ""

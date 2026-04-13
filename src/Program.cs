@@ -32,7 +32,13 @@ app.UseCors();
 app.UseMiddleware<JwtMiddleware>();
 
 // ── Health Check ───────────────────────────────
-app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "school-api-dotnet" }));
+app.MapGet("/health", (IConfiguration config) => Results.Ok(new
+{
+    status = "ok",
+    service = "school-api-dotnet",
+    db_host = config["DB_HOST"] ?? "NOT SET",
+    db_name = config["DB_NAME"] ?? "NOT SET"
+}));
 
 // ── Login ──────────────────────────────────────
 app.MapPost("/login", async (LoginRequest req, DatabaseService db, IConfiguration config) =>
@@ -42,8 +48,14 @@ app.MapPost("/login", async (LoginRequest req, DatabaseService db, IConfiguratio
 
     try
     {
-        var user = await db.ValidateLogin(req.Email, req.Password);
+        var user = await db.GetUserByEmail(req.Email);
         if (user == null)
+            return Results.Json(ApiResponse.Fail("Invalid credentials"), statusCode: 401);
+
+        if (!user.IsActive)
+            return Results.Json(ApiResponse.Fail("Account is disabled"), statusCode: 401);
+
+        if (!BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash))
             return Results.Json(ApiResponse.Fail("Invalid credentials"), statusCode: 401);
 
         var secret = config["JWT_SECRET"] ?? "dev-secret-change-in-production";

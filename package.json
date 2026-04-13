@@ -1,0 +1,8 @@
+{
+  "name": "school-api-dotnet-scripts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "postman": "node scripts/generate-postman.js"
+  }
+}

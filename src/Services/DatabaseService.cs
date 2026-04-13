@@ -22,24 +22,27 @@ public class DatabaseService
     private MySqlConnection CreateConnection() => new(_connectionString);
 
     // ── Login ──────────────────────────────────
-    public async Task<UserInfo?> ValidateLogin(string email, string password)
+    public async Task<UserInfo?> GetUserByEmail(string email)
     {
         await using var conn = CreateConnection();
         await conn.OpenAsync();
 
-        await using var cmd = new MySqlCommand("CALL sp_login(@email, @password)", conn);
+        await using var cmd = new MySqlCommand("CALL sp_get_user_by_email(@email)", conn);
         cmd.Parameters.AddWithValue("@email", email);
-        cmd.Parameters.AddWithValue("@password", password);
 
         await using var reader = await cmd.ExecuteReaderAsync();
         if (await reader.ReadAsync())
         {
+            var firstName = reader.GetString("first_name");
+            var lastName = reader.GetString("last_name");
             return new UserInfo
             {
                 Id = reader.GetInt32("id"),
                 Email = reader.GetString("email"),
-                Name = reader.GetString("name"),
-                Role = reader.GetString("role")
+                PasswordHash = reader.GetString("password_hash"),
+                Role = reader.GetString("role"),
+                IsActive = reader.GetBoolean("is_active"),
+                Name = $"{firstName} {lastName}".Trim()
             };
         }
         return null;

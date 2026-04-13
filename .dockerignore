@@ -1,0 +1,7 @@
+bin/
+obj/
+.aws-sam/
+.dev.pid
+.dev.log
+postman/
+node_modules/
