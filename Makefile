@@ -1,5 +1,5 @@
 # ============================================
-# school-api · Makefile
+# school-api-dotnet · Makefile
 # ============================================
 
 REGION := us-east-1
@@ -109,8 +109,8 @@ postman-prod:
 # ── GitHub ──────────────────────────────────
 
 push:
-	@if ! gh repo view $(GH_ORG)/school-api > /dev/null 2>&1; then \
-		gh repo create $(GH_ORG)/school-api --public --source=. --push; \
+	@if ! gh repo view $(GH_ORG)/school-api-dotnet > /dev/null 2>&1; then \
+		gh repo create $(GH_ORG)/school-api-dotnet --public --source=. --push; \
 	else \
 		git push origin main; \
 	fi
