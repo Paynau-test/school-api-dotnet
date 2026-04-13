@@ -22,7 +22,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        // TODO: In production, restrict to specific frontend domain
+        // Allow all origins for this school management demo
         policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
     });
 });

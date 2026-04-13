@@ -4,12 +4,14 @@ REST API for school scores management built with C# .NET 8, deployed as AWS Lamb
 
 ## Endpoints
 
-| Method | Path     | Auth | Description                         |
-|--------|----------|------|-------------------------------------|
-| POST   | /login   | No   | JWT authentication                  |
-| GET    | /scores  | Yes  | Get scores by student/grade/month   |
-| POST   | /scores  | Yes  | Record or update a score (upsert)   |
-| GET    | /health  | No   | Health check                        |
+| Method | Path              | Auth | Description                         |
+|--------|-------------------|------|-------------------------------------|
+| POST   | /login            | No   | JWT authentication                  |
+| GET    | /students/search  | Yes  | Search students by ID or name       |
+| GET    | /grades           | Yes  | List all grades                     |
+| GET    | /scores           | Yes  | Get scores by student/grade/month   |
+| POST   | /scores           | Yes  | Record or update a score (upsert)   |
+| GET    | /health           | No   | Health check                        |
 
 ## GET /scores
 
@@ -45,6 +47,6 @@ make deploy
 
 ## Stored Procedures Used
 
-- `sp_login` — Validate credentials, return user info
+- `sp_get_user_by_email` — Get user by email for login (BCrypt verification in app)
 - `sp_get_scores` — Get all subjects for a grade with scores (LEFT JOIN)
 - `sp_record_score` — Upsert a score record
