@@ -35,7 +35,7 @@ dev-native:
 # ── Build & Deploy ──────────────────────────
 
 build:
-	@sam build
+	@sam build --use-container
 
 deploy:
 	@echo "Reading infra outputs from AWS..."
@@ -53,7 +53,7 @@ deploy:
 	echo "VPC: $$VPC_ID" && \
 	echo "Subnets: $$SUBNETS" && \
 	echo "DB Host: $$DB_HOST" && \
-	sam build && \
+	sam build --use-container && \
 	sam deploy --stack-name $(STACK) \
 		--region $(REGION) \
 		--capabilities CAPABILITY_IAM \
