@@ -3,7 +3,7 @@
 # ============================================
 
 REGION := us-east-1
-STACK  := school-api
+STACK  := school-api-dotnet
 GH_ORG := Paynau-test
 
 .PHONY: install build deploy destroy dev stop logs dev-native logs-aws postman postman-prod push help
@@ -67,7 +67,7 @@ deploy:
 			DbUser=$$DB_USER \
 			DbPassword=$$DB_PASS \
 			DbName=school_db \
-			JwtSecret=school-jwt-secret-prod-2026 \
+			JwtSecret=school-jwt-secret-prod-2026-dotnet \
 	|| echo "Stack already up to date."
 
 deploy-info:

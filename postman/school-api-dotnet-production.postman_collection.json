@@ -2,13 +2,13 @@
   "info": {
     "name": "School API .NET (Scores) - Production",
     "_postman_id": "school-api-dotnet-production",
-    "description": "Scores API - C# .NET 8\nEnvironment: Production\nBase URL: https://DEPLOY_FIRST.execute-api.us-east-1.amazonaws.com/Prod\n\nFlow: 1) Login → 2) Token auto-saved → 3) Get/Record scores.",
+    "description": "Scores API - C# .NET 8\nEnvironment: Production\nBase URL: https://0dxkllsiyf.execute-api.us-east-1.amazonaws.com/Prod\n\nFlow: 1) Login → 2) Token auto-saved → 3) Get/Record scores.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "base_url",
-      "value": "https://DEPLOY_FIRST.execute-api.us-east-1.amazonaws.com/Prod",
+      "value": "https://0dxkllsiyf.execute-api.us-east-1.amazonaws.com/Prod",
       "type": "string"
     },
     {
