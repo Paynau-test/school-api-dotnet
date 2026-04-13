@@ -93,6 +93,27 @@ app.MapPost("/login", async (LoginRequest req, DatabaseService db, IConfiguratio
     }
 });
 
+// ── GET /students/search ──────────────────────
+app.MapGet("/students/search", async (string? term, string? status, int? limit, int? offset, DatabaseService db) =>
+{
+    try
+    {
+        var results = await db.SearchStudents(term ?? "", status, limit ?? 20, offset ?? 0);
+        return Results.Ok(ApiResponse<List<StudentRow>>.Ok(results));
+    }
+    catch (MySqlConnector.MySqlException ex) when (ex.SqlState == "45000")
+    {
+        return Results.BadRequest(ApiResponse.Fail(ex.Message));
+    }
+});
+
+// ── GET /grades ───────────────────────────────
+app.MapGet("/grades", async (DatabaseService db) =>
+{
+    var grades = await db.GetGrades();
+    return Results.Ok(ApiResponse<List<GradeRow>>.Ok(grades));
+});
+
 // ── GET /scores ────────────────────────────────
 app.MapGet("/scores", async (int studentId, int gradeId, int year, int month, DatabaseService db) =>
 {

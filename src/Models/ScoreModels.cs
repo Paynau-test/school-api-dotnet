@@ -39,6 +39,25 @@ public class RecordScoreResult
     public string Operation { get; set; } = "";
 }
 
+// Student search result
+public class StudentRow
+{
+    public int Id { get; set; }
+    public string FirstName { get; set; } = "";
+    public string LastNameFather { get; set; } = "";
+    public string LastNameMother { get; set; } = "";
+    public int GradeId { get; set; }
+    public string GradeName { get; set; } = "";
+    public string Status { get; set; } = "";
+}
+
+// Grade
+public class GradeRow
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = "";
+}
+
 // Login
 public class LoginRequest
 {

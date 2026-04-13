@@ -48,6 +48,58 @@ public class DatabaseService
         return null;
     }
 
+    // ── Search Students ────────────────────────
+    public async Task<List<StudentRow>> SearchStudents(string term, string? status, int limit, int offset)
+    {
+        await using var conn = CreateConnection();
+        await conn.OpenAsync();
+
+        await using var cmd = new MySqlCommand(
+            "CALL sp_search_students(@term, @status, @limit, @offset)", conn);
+        cmd.Parameters.AddWithValue("@term", term);
+        cmd.Parameters.AddWithValue("@status", status ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@limit", limit);
+        cmd.Parameters.AddWithValue("@offset", offset);
+
+        var results = new List<StudentRow>();
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            results.Add(new StudentRow
+            {
+                Id = reader.GetInt32("id"),
+                FirstName = reader.GetString("first_name"),
+                LastNameFather = reader.GetString("last_name_father"),
+                LastNameMother = reader.IsDBNull(reader.GetOrdinal("last_name_mother")) ? "" : reader.GetString("last_name_mother"),
+                GradeId = reader.GetInt32("grade_id"),
+                GradeName = reader.GetString("grade_name"),
+                Status = reader.GetString("status")
+            });
+        }
+        return results;
+    }
+
+    // ── Get Grades ──────────────────────────────
+    public async Task<List<GradeRow>> GetGrades()
+    {
+        await using var conn = CreateConnection();
+        await conn.OpenAsync();
+
+        await using var cmd = new MySqlCommand("SELECT id, name FROM grades ORDER BY id", conn);
+
+        var results = new List<GradeRow>();
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            results.Add(new GradeRow
+            {
+                Id = reader.GetInt32("id"),
+                Name = reader.GetString("name")
+            });
+        }
+        return results;
+    }
+
     // ── Get Scores ─────────────────────────────
     public async Task<List<ScoreRow>> GetScores(int studentId, int gradeId, int year, int month)
     {
